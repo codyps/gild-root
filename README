@@ -1,0 +1,11 @@
+# gild-root
+
+A pre-init which mounts an overlayfs over a (potentially) read-only rootfs
+
+# Build
+
+`tup`
+
+# License
+
+AGPL-3.0 or later

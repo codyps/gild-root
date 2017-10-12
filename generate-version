@@ -1,0 +1,10 @@
+#! /bin/sh
+cd "$(dirname "$0")"
+version="$(git describe --always --dirty=+)"
+
+p="generated/gr/version.h"
+mkdir -p "$(dirname "$p")"
+cat >"$p" <<EOF
+#pragma once
+#define GILD_ROOT_VERSION $version
+EOF

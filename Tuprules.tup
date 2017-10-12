@@ -1,0 +1,14 @@
+CFLAGS  += -Wall -Wextra -std=gnu11 -Wundef -Werror -Wold-style-definition -Wmissing-prototypes -Wstrict-prototypes -pipe -fdiagnostics-color=always
+LDFLAGS += -Wl,--as-needed,-O1
+
+CFLAGS += -flto
+
+CFLAGS += -fsanitize=address
+CFLAGS += -fsanitize=undefined
+
+LDFLAGS += $(CFLAGS)
+
+CPP = $(CC) -E
+
+!cc      = |> $(CC) $(CFLAGS) $(CPPFLAGS) -c -o %o %f |>
+!ccld    = |> $(CC) $(LDFLAGS) -o %o %f $(LIBS) |>

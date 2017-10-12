@@ -1,0 +1,9 @@
+CC=cc
+include_rules
+CFLAGS += -I.
+
+src-gild = gild-root.c
+
+: | * |> ./generate-version |> generated/gr/version.h
+: foreach $(src-gild) | generated/gr/version.h |> !cc |> %f.o {obj}
+: {obj} |> !ccld |> gild-root
