@@ -145,7 +145,7 @@ int main(int argc, char **argv)
 		"workdir=" RW_BEFORE "/work"
 	);
 	if (r == -1) {
-		pr("no overlay mounted, running init");
+		pr("no overlay mounted, running init\n");
 		goto exec_init;
 	}
 
@@ -164,10 +164,15 @@ int main(int argc, char **argv)
 
 	r = pivot_root(OVERLAY_BEFORE, OVERLAY_BEFORE ROOT_AT_EXIT);
 	if (r == -1) {
-		// 
+		pr("pivot failed: %s\n", strerror(errno));
+		// TODO: tear down setup and exec init.
+		goto exec_init;
 	}
 
-	umount(ROOT_AT_EXIT "/proc");
+	r = umount(ROOT_AT_EXIT "/proc");
+	if (r == -1) {
+		pr("warning: failed to unmount old proc at " ROOT_AT_EXIT "/proc : %s", strerror(errno));
+	}
 
 	mount_warn(ROOT_AT_EXIT "/dev", "/dev", NULL, MS_MOVE, "");
 
