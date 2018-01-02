@@ -1,3 +1,9 @@
+ifdef CC
+CC = @(CC)
+else
+CC = cc
+endif
+
 CFLAGS  += -Wall -Wextra -std=gnu11 -Wundef -Werror -Wold-style-definition -Wmissing-prototypes -Wstrict-prototypes -pipe -fdiagnostics-color=always
 LDFLAGS += -Wl,--as-needed,-O1
 

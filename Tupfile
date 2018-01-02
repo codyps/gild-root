@@ -1,4 +1,3 @@
-CC=cc
 include_rules
 CFLAGS += -I.
 
