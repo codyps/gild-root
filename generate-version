@@ -2,7 +2,7 @@
 cd "$(dirname "$0")"
 version="$(git describe --always --dirty=+)"
 
-p="generated/gr/version.h"
+p="$1"
 mkdir -p "$(dirname "$p")"
 cat >"$p" <<EOF
 #pragma once

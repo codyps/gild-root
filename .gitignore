@@ -1,4 +1,5 @@
 generated/
 .tup/
-
+_*
 gild-root
+*.out

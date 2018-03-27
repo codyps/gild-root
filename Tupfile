@@ -3,6 +3,6 @@ CFLAGS += -I.
 
 src-gild = gild-root.c
 
-: | * |> ./generate-version |> generated/gr/version.h
-: foreach $(src-gild) | generated/gr/version.h |> !cc |> %f.o {obj}
+: | * |> ./generate-version gr-version.h |> gr-version.h
+: foreach $(src-gild) | gr-version.h |> !cc |> %f.o {obj}
 : {obj} |> !ccld |> gild-root

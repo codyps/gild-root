@@ -1,13 +1,16 @@
 #include "grab-file.h"
 
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 
 #define INITIAL_BUF_SZ 256
 #define MIN_BUF_SZ 256
-#define BUF_GROW_MULT 2
-#define BUF_GROW_ADD 0
+#define BUF_GROW_MULT 1
+#define BUF_GROW_ADD 1024*1024
 
 ssize_t fd_read_to_end(int fd, char **buf, size_t *len)
 {
@@ -47,4 +50,21 @@ ssize_t fd_read_to_end(int fd, char **buf, size_t *len)
 			b = nb;
 		}
 	}
+}
+
+char *grab_file(const char *path, size_t *size)
+{
+	int fd = open(path, O_RDONLY);
+	char *buf = NULL;
+	size_t s = 0;
+	ssize_t r = fd_read_to_end(fd, &buf, &s);
+	if (r < 0) {
+		free(buf);
+		*size = 0;
+		return NULL;
+	}
+
+	// XXX: could use realloc to shrink the allocation
+	*size = (size_t)r;
+	return buf;
 }
