@@ -177,7 +177,7 @@ int main(int argc, char **argv)
 	mount_warn(ROOT_AT_EXIT "/dev", "/dev", NULL, MS_MOVE, "");
 
 exec_init:
-	argv[0] = NEXT_INIT;
+	argv[0] = (char *)NEXT_INIT;
 	execv_(NEXT_INIT, argv);
 	// if we get here, we've failed the init.
 	// exiting will result in a panic.

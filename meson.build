@@ -1,10 +1,27 @@
 project('gild-root', 'c')
 
+cg_flags = [
+  '-fsanitize=undefined',
+  '-fsanitize=address',
+  '-ggdb3'
+]
+
+if meson.get_compiler('c').get_id() == 'gcc'
+  cg_flags += '-fvar-tracking-assignments'
+endif
+
 add_global_arguments(
   '-Wall', '-Wextra',
   '-Wundef', '-Wold-style-definition', '-Wmissing-prototypes', '-Wstrict-prototypes',
+  '-Wwrite-strings',
   '-fdiagnostics-color=always',
   '-Werror',
+  cg_flags,
+  language: 'c'
+)
+
+add_global_link_arguments(
+  cg_flags,
   language: 'c'
 )
 
