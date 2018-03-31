@@ -1,5 +1,18 @@
-project('gild-root', 'c',
+project('gild-root', 'c')
+
+add_global_arguments(
+  '-Wall', '-Wextra',
+  '-Wundef', '-Wold-style-definition', '-Wmissing-prototypes', '-Wstrict-prototypes',
+  '-fdiagnostics-color=always',
+  '-Werror',
+  language: 'c'
 )
+
+# TODO: options
+#  - sanitize
+#  - lto
+#  - diag color?
+#  - werror
 
 #git = find_program('git')
 custom_target('version',
