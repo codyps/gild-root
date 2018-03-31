@@ -14,6 +14,7 @@ int main(int argc, char *argv[]) {
 
 	char *buf = NULL;
 	size_t l;
+	int e = 0;
 
 	for (i = 1; i < argc; i++) {
 		int fd = open(argv[i], O_RDONLY);
@@ -23,6 +24,7 @@ int main(int argc, char *argv[]) {
 				"> error: %s\n"
 			, argv[i], strerror(errno));
 			errno = 0;
+			e++;
 			continue;
 		}
 
@@ -32,14 +34,15 @@ int main(int argc, char *argv[]) {
 		if (r < 0) {
 			fprintf(stderr, "error reading %s: %s\n",
 					argv[i], strerror(errno));
+			e++;
 		}
 
 		fwrite(buf, l, 1, stdout);
 
 		putchar('\n');
 	}
-
+	
 	free(buf);
 
-	return 0;
+	return e > 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
