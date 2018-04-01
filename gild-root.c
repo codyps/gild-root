@@ -114,7 +114,25 @@ int main(int argc, char **argv)
 		goto exec_init;
 	}
 
-	// TODO: examine the cmdline
+	size_t cmdline_size;
+	char *cmdline;
+	cmdline = grab_file("/proc/cmdline", &cmdline_size);
+
+	const char *rw_device = cmdline_find(cmdline, cmdline_size, "gr.rw_device");
+	if (!rw_device) {
+		pr("no rw_device provided, running init");
+		goto exec_init;
+	}
+
+	const char *fs_type = cmdline_find(cmdline, cmdline_size, "gr.fs_type");
+	if (!fs_type) {
+		pr("no fs_type provided, running init");
+		goto exec_init;
+	}
+
+	const char *fs_opts = cmdline_find(cmdline, cmdline_size, "gr.fs_opts");
+	if (!fs_opts)
+		fs_opts = "";
 
 	// TODO: mount devtmpfs if not already mounted?
 	//   - wouldn't want this if we wanted to use a static /dev from the RO root.
@@ -122,7 +140,7 @@ int main(int argc, char **argv)
 
 	// TODO: run other prep steps (formatting?)
 
-	r = mount_warn(RW_DEV, RW_BEFORE, RW_DEV_FS, RW_DEV_FLAGS, RW_DEV_FSOPTS); 
+	r = mount_warn(rw_device, RW_BEFORE, fs_type, RW_DEV_FLAGS, fw_opts); 
 	if (r == -1) {
 		// TODO: potentially use some fallback steps (formatting) &
 		// retry the mount once.
@@ -137,9 +155,13 @@ int main(int argc, char **argv)
 	mkdir_may_exist(RW_BEFORE "/upper", 0755);
 	mkdir_may_exist(RW_BEFORE "/work",  0755);
 
-	// TODO: generate a meaningful device name. Including the device name
-	// of the lower would be good.
-	r = mount_warn("gild:" RW_DEV, OVERLAY_BEFORE, "overlay", OVERLAY_FLAGS,
+	// TODO: generate a more meaningful device name. Including the device
+	// name of the lower would be good.
+	const char *base = "gild:";
+	char n[strlen("gild:") + strlen(rw_device) + 1];
+	sprintf(n, "%s%s", base, rw_device);
+
+	r = mount_warn(n, OVERLAY_BEFORE, "overlay", OVERLAY_FLAGS,
 		"lowerdir=/,"
 		"upperdir=" RW_BEFORE "/upper,"
 		"workdir=" RW_BEFORE "/work"
@@ -174,6 +196,8 @@ int main(int argc, char **argv)
 		pr("warning: failed to unmount old proc at " ROOT_AT_EXIT "/proc : %s", strerror(errno));
 	}
 
+	// TODO: check if mounted so we can avoid warning on move failures due
+	// to a lack of a devtmpfs
 	mount_warn(ROOT_AT_EXIT "/dev", "/dev", NULL, MS_MOVE, "");
 
 exec_init:
