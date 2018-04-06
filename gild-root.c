@@ -9,6 +9,8 @@
 #include <string.h>
 
 #include <generated/gr/version.h>
+#include "grab-file.h"
+#include "cmdline.h"
 
 #define STR_(x) #x
 #define STR(x) STR_(x)
@@ -22,12 +24,6 @@
 #define RW_AT_EXIT "/overlay"
 
 
-// TODO: take this from cmdline, config, or use UUID to auto-select
-#define RW_DEV "/dev/sda2"
-// TODO: take this from cmdline, config, or autodetect
-#define RW_DEV_FS "btrfs"
-// TODO: take from cmdline/config
-#define RW_DEV_FSOPTS ""
 // TODO: take from cmdline/config
 #define RW_DEV_FLAGS MS_NOATIME
 // TODO: take from cmdline/config
@@ -97,6 +93,20 @@ int mkdir_may_exist(const char *path, mode_t mode)
 	return r;
 }
 
+__attribute__((__noreturn__))
+static void
+exec_init(char **argv)
+{
+	argv[0] = (char *)NEXT_INIT;
+	execv_(NEXT_INIT, argv);
+	// if we get here, we've failed the init.
+	// exiting will result in a panic.
+	//
+	// TODO: consider fallback to execing other inits, depending on the
+	// configuration/cmdline/config file.
+	abort();
+}
+
 int main(int argc, char **argv)
 {
 	(void)argc;
@@ -111,7 +121,7 @@ int main(int argc, char **argv)
 	r = mount_warn("proc", "/proc", "proc", MS_REMOUNT, "");
 	if (r == -1) {
 		pr("no overlay mounted, running init");
-		goto exec_init;
+		exec_init(argv);
 	}
 
 	size_t cmdline_size;
@@ -121,13 +131,13 @@ int main(int argc, char **argv)
 	const char *rw_device = cmdline_find(cmdline, cmdline_size, "gr.rw_device");
 	if (!rw_device) {
 		pr("no rw_device provided, running init");
-		goto exec_init;
+		exec_init(argv);
 	}
 
 	const char *fs_type = cmdline_find(cmdline, cmdline_size, "gr.fs_type");
 	if (!fs_type) {
 		pr("no fs_type provided, running init");
-		goto exec_init;
+		exec_init(argv);
 	}
 
 	const char *fs_opts = cmdline_find(cmdline, cmdline_size, "gr.fs_opts");
@@ -140,14 +150,14 @@ int main(int argc, char **argv)
 
 	// TODO: run other prep steps (formatting?)
 
-	r = mount_warn(rw_device, RW_BEFORE, fs_type, RW_DEV_FLAGS, fw_opts); 
+	r = mount_warn(rw_device, RW_BEFORE, fs_type, RW_DEV_FLAGS, fs_opts); 
 	if (r == -1) {
 		// TODO: potentially use some fallback steps (formatting) &
 		// retry the mount once.
 		
 		// fallback to non-overlay mount.
 		pr("no overlay mounted, running init");
-		goto exec_init;
+		exec_init(argv);
 	}
 
 	// TODO: for generic hole punching create extra dirs
@@ -168,7 +178,7 @@ int main(int argc, char **argv)
 	);
 	if (r == -1) {
 		pr("no overlay mounted, running init\n");
-		goto exec_init;
+		exec_init(argv);
 	}
 
 	// address sanitizer uses /proc, lets make sure it's always mounted at /proc to avoid any issues.
@@ -188,7 +198,7 @@ int main(int argc, char **argv)
 	if (r == -1) {
 		pr("pivot failed: %s\n", strerror(errno));
 		// TODO: tear down setup and exec init.
-		goto exec_init;
+		exec_init(argv);
 	}
 
 	r = umount(ROOT_AT_EXIT "/proc");
@@ -200,13 +210,5 @@ int main(int argc, char **argv)
 	// to a lack of a devtmpfs
 	mount_warn(ROOT_AT_EXIT "/dev", "/dev", NULL, MS_MOVE, "");
 
-exec_init:
-	argv[0] = (char *)NEXT_INIT;
-	execv_(NEXT_INIT, argv);
-	// if we get here, we've failed the init.
-	// exiting will result in a panic.
-	//
-	// TODO: consider fallback to execing other inits, depending on the
-	// configuration/cmdline/config file.
-	return EXIT_FAILURE;
+	exec_init(argv);
 }

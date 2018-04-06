@@ -37,7 +37,7 @@ custom_target('version',
     command: ['./generate-version', '@OUTPUT@']
 )
 
-executable('gild-root', 'gild-root.c')
+executable('gild-root', 'gild-root.c', 'grab-file.c', 'cmdline.c')
 t_cmdline = executable('test-cmdline', 'test-cmdline.c', 'cmdline.c', native: true)
 t_grabfile = executable('test-grabfile', 'test-grab-file.c', 'grab-file.c', native: true)
 
