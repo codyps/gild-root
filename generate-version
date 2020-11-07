@@ -1,8 +1,15 @@
 #! /bin/sh
-cd "$(dirname "$0")"
-version="$(git describe --always --dirty=+)"
+src_dir="$1"
+project_version="$2"
+tag="$3"
+output="$4"
 
-p="$1"
+if [ -z "$tag" ]; then
+	version="$(git -C "$src_dir" describe --always --dirty=+ | sed 's/^gild-root-//')"
+else
+	version="$tag"
+fi
+
 mkdir -p "$(dirname "$p")"
 cat >"$p" <<EOF
 #pragma once

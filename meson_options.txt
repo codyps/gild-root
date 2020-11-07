@@ -1,0 +1,4 @@
+option('version-tag', type : 'string',
+       description : 'override the git version string')
+
+option('rootlibexecdir', type : 'string')
