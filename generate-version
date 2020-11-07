@@ -1,4 +1,5 @@
-#! /bin/sh
+#! /usr/bin/env bash
+set -euf -o pipefail
 src_dir="$1"
 project_version="$2"
 tag="$3"
@@ -10,8 +11,7 @@ else
 	version="$tag"
 fi
 
-mkdir -p "$(dirname "$p")"
-cat >"$p" <<EOF
+cat >"$output" <<EOF
 #pragma once
 #define GILD_ROOT_VERSION $version
 EOF

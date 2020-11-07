@@ -3,15 +3,12 @@ project('gild-root', 'c',
   default_options: [
     'c_std=gnu18',
     'b_lto=true',
-    'b_sanitizers=address,undefined',
-    'warn_level=2',
+    'b_sanitize=address,undefined',
+    'warning_level=2',
     ],
   license: 'AGPL-v3-or-later',
   meson_version: '>=0.50',
   )
-
-conf = configuration_data()
-conf.set('PROJECT_VERSION', meson.project_version())
 
 cg_flags = []
 
@@ -30,14 +27,11 @@ add_global_link_arguments(
   language: 'c'
   )
 
-custom_target('version',
-  output: 'gr-version.h',
-  command: ['./generate-version', meson.current_source_dir(), meson.project_version(), get_option('version-tag'), '@OUTPUT@']
-  )
+subdir('generated/gr')
 
 executable('gild-root',
-  'gild-root.c', 'grab-file.c', 'cmdline.c',
-  install: true
+  'gild-root.c', 'grab-file.c', 'cmdline.c', version,
+  install: true,
   install_dir: get_option('rootlibexecdir') / 'gild-root'
   )
 
