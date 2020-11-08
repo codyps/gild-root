@@ -41,6 +41,7 @@ On the kernel cmdline, the following options can be provided:
 	- `gr.fs_type`: Required. The fstype of the "rw" filesystem.
 	- `gr.fs_opts`: Optional, defaults to empty. Filesystem options for the "rw" filesystem.
 
+
 # License
 
 AGPL-3.0 or later
