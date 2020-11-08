@@ -12,6 +12,8 @@ project('gild-root', 'c',
 
 cg_flags = []
 
+project_source_root = meson.current_source_dir()
+
 add_global_arguments(
   cg_flags,
   language: 'c'
