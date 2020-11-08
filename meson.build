@@ -31,15 +31,27 @@ add_global_link_arguments(
 
 subdir('generated/gr')
 
+cmdline_sta = static_library('cmdline',
+  'cmdline.c')
+
+cmdline = declare_dependency(
+  link_with: cmdline_sta,
+  include_directories: '.',
+  )
+
+grab_file_sta = static_library('grab_file',
+  'grab-file.c')
+
+grab_file = declare_dependency(
+  link_with: grab_file_sta,
+  include_directories: '.',
+  )
+
 executable('gild-root',
-  'gild-root.c', 'grab-file.c', 'cmdline.c', version,
+  'gild-root.c', version,
+  dependencies: [grab_file, cmdline],
   install: true,
   install_dir: get_option('rootlibexecdir') / 'gild-root'
   )
 
-t_cmdline = executable('test-cmdline', 'test-cmdline.c', 'cmdline.c', native: true)
-t_grabfile = executable('test-grabfile', 'test-grab-file.c', 'grab-file.c', native: true)
-
-test_files = files(['grab-file.c'])
-test('cmdline', t_cmdline)
-test('grabfile', t_grabfile, args: test_files)
+subdir('tests')
