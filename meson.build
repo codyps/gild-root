@@ -47,6 +47,16 @@ grab_file = declare_dependency(
   include_directories: '.',
   )
 
+parse_mount_flags_sta = static_library('parse_mount_flags',
+  'parse-mount-flags.c',
+  include_directories: 'ccan'
+  )
+
+parse_mount_flags = declare_dependency(
+  link_with: parse_mount_flags_sta,
+  include_directories: ['.', 'ccan']
+  )
+
 executable('gild-root',
   'gild-root.c', version,
   dependencies: [grab_file, cmdline],
